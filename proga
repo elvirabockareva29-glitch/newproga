@@ -12,7 +12,6 @@ int main(void) {
     double best_x = 0.0, best_y = 0.0, best_z = 0.0;
 
     printf("   x      y      z        U\n");
-    printf("-------------------------------------\n");
 
     // Перебор по x
     for (int ix = 0;; ++ix) {
