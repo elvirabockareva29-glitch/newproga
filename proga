@@ -1,52 +1,52 @@
-#include <stdio.h> // подключение библиотек
-#include <math.h> //подключение мат.функ
-#include <float.h> //определяется коснтанты(double, float)
+#include <stdio.h>
+#include <stdlib.h> //для работы с динам.памятью
 
-int main(void) {
-    const double x_min = 1.0, x_max = 3.0, hx = 1.2; //объеявление констант 
-    const double y_min = 0.0, y_max = 1.0, hy = 0.55;
-    const double z_min = 1.0, z_max = 2.0, hz = 0.6;
-    const double eps = 1e-9; // погрешность для сравнения чисел 
-    double best_U = -DBL_MAX; //для хранения максимального U 
-    double best_x = 0.0, best_y = 0.0, best_z = 0.0;
+int main() {
+    int N;
+    printf("Введите N: ");
+    scanf("%d", &N);
 
-    printf("   x      y      z        U\n");
-
-    // Перебор по x
-    for (int ix = 0;; ++ix) {
-        double x = x_min + ix * hx;
-        if (x > x_max + eps) break;
-
-        // Перебор по y
-        for (int iy = 0;; ++iy) {
-            double y = y_min + iy * hy;
-            if (y > y_max + eps) break;
-
-            // Перебор по z
-            for (int iz = 0;; ++iz) {
-                double z = z_min + iz * hz;
-                if (z > z_max + eps) break;
-
-                // Формула для U
-                double denom = z*z + (x*x)/4.0; //вычисление знаменателя
-                double expr = y - sqrt(x) * (x - y/denom); // вычисление выражения
-                double U = sin(expr);
-
-                printf("%5.2f  %5.2f  %5.2f   %10.6f\n", x, y, z, U); // вывод одной строки с форматом
-
-                if (U > best_U) { //если значение U больше текущего - обновляем максимум. 
-                    best_U = U;
-                    best_x = x;
-                    best_y = y;
-                    best_z = z;
-                }
-            }
-        }
+    int *numbers = malloc(N * sizeof(int));
+    if (numbers == NULL) {
+        printf("Ошибка\n");
+        return 1;
     }
 
-    printf("\nМаксимальное значение U = %.6f\n", best_U);//вывод с 6 знаками после запятой
-    printf("Достигается при: x = %.2f, y = %.2f, z = %.2f\n",
-           best_x, best_y, best_z);
+    int length = 0;
 
+    int rec(int sum) {  // рекурсивная функция внутри main
+        if (sum == N) {
+            for (int i = 0; i < length; i++) {
+                if (i > 0) printf(" + ");
+                printf("%d", numbers[i]);
+            }
+            printf("\n");
+            return 0;
+        }
+
+        for (int i = 1; i <= N; i++) {
+            int prime = 1;
+            if (i > 1) {
+                for (int j = 2; j * j <= i; j++) {
+                    if (i % j == 0) {
+                        prime = 0;
+                        break;
+                    }
+                }
+            }
+
+            if (prime && sum + i <= N) {
+                numbers[length++] = i;   
+                rec(sum + i);            
+                length--;               
+            }
+        }
+        return 0;
+    }
+
+    printf("N = %d\n", N);
+    rec(0); 
+
+    free(numbers);// освобождение памяти
     return 0;
-} 
+}
