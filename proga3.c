@@ -1,77 +1,39 @@
-#include <stdio.h>
-#include <string.h>
+#!/bin/bash
 
-int main() {
-    FILE *f, *temp;
-    char action[10];
-    char name[100], phone[50], email[100], line[200];
+FILE="contacts.txt"
 
-    printf("Что сделать? (add / search / delete): ");
-    scanf("%9s", action);
+echo "Что сделать? (add / search / delete): "
+read action
 
-    if (strcmp(action, "add") == 0) {
-        printf("Имя: ");
-        scanf("%99s", name);
-        printf("Телефон: ");
-        scanf("%49s", phone);
-        printf("Email: ");
-        scanf("%99s", email);
+if [[ "$action" == "add" ]]; then
+    echo "Имя: "
+    read name
+    echo "Телефон: "
+    read phone
+    echo "Email: "
+    read email
+    echo "$name,$phone,$email" >> "$FILE"
+    echo "Контакт добавлен."
 
-        f = fopen("contacts.txt", "a");
-        fprintf(f, "%s,%s,%s\n", name, phone, email);
-        fclose(f);
+elif [[ "$action" == "search" ]]; then
+    echo "Введите строку для поиска: "
+    read query
+    if [[ -f "$FILE" ]]; then
+        grep -i "$query" "$FILE" || echo "Совпадений не найдено."
+    else
+        echo "Файл контактов не найден."
+    fi
 
-        printf("Контакт добавлен.\n");
-    }
-      
-    else if (strcmp(action, "search") == 0) {
-        char query[100];
-        printf("Введите строку для поиска: ");
-        scanf("%99s", query);
+elif [[ "$action" == "delete" ]]; then
+    echo "Введите имя для удаления: "
+    read delname
+    if [[ -f "$FILE" ]]; then
+        grep -iv "^$delname," "$FILE" > temp.txt && mv temp.txt "$FILE"
+        echo "Контакт удалён (если существовал)."
+    else
+        echo "Файл контактов не найден."
+    fi
 
-        f = fopen("contacts.txt", "r");
-        if (!f) {
-            printf("Файл не найден.\n");
-            return 0;
-        }
-
-        while (fgets(line, sizeof(line), f)) {
-            if (strstr(line, query))
-                printf("%s", line);
-        }
-
-        fclose(f);
-    }
-
-    else if (strcmp(action, "delete") == 0) {
-        char delname[100];
-        printf("Введите имя для удаления: ");
-        scanf("%99s", delname);
-
-        f = fopen("contacts.txt", "r");
-        temp = fopen("temp.txt", "w");
-        if (!f || !temp) {
-            printf("Ошибка открытия файла.\n");
-            return 0;
-        }
-
-        while (fgets(line, sizeof(line), f)) {
-            if (strncmp(line, delname, strlen(delname)) != 0)
-                fputs(line, temp);
-        }
-
-        fclose(f);
-        fclose(temp);
-      
-        remove("contacts.txt");
-        rename("temp.txt", "contacts.txt");
-
-        printf("Контакт удалён (если был найден).\n");
-    }
-
-    else {
-        printf("Неизвестное действие.\n");
-    }
-
-    return 0;
-}
+else
+    echo "Неизвестное действие."
+fi
